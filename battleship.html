@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+  <head>
+
+     <meta charset="utf-8">
+     <title>Zadanie rekrutacyjne</title>
+
+     <meta name="description" content="Battleship game">
+     <meta name="author" content="Karol Jezierzański">
+     
+
+  </head>
+  <body>
+    <h1 id="hello">Battleship Game</h1>
+    <div style="text-align:center; padding: 20px;">  
+      <button id = "btn"> Strzelaj </button>   
+  </div> 
+    <center>
+        <canvas id="gridplayer"></canvas>
+        <canvas id="gridenemy"></canvas>
+    </center>
+    <script src="battleshipgrid.js"></script>
+    <script src="battleshipfunctions.js"></script>
+    <script>
+
+     let boxDim = 30; //Width and height of grid 1x1
+     
+
+    let rows = setBoxAmount(12);
+    let columns = setBoxAmount(12);
+
+    const shipsV=[4,3,2]; //Trzy statki w pozycji pionowej, numer oznacza długość statku
+    const shipsH=[3,2,2]; //Analogicznie
+
+    let mapV1= randomShipPositionV(shipsV,shipMap()); //metoda zwracająca mapę z 3 statkami w pozycji pionowej
+    let finalMap1= randomShipPositionH(shipsH,mapV1); //przekazujemy mapę z poprzedniej metody do następnej
+
+    let mapV2= randomShipPositionV(shipsV,shipMap()); //Analogicznie dla 2 gracza
+    let finalMap2= randomShipPositionH(shipsH,mapV2);
+
+    let ctx1 = drawGrid(rows, columns,"gridplayer"); //metoda zwracająca kontekst canvas
+    let ctx2 = drawGrid(rows, columns,"gridenemy"); //:)
+
+    drawBoxes(finalMap1,ctx1); //przekazujemy mapy oraz konteksty
+    drawBoxes(finalMap2,ctx2);
+
+    let count1;
+    let count2;
+
+      document.getElementById("btn").addEventListener("click", fun);  //kliknięcie przycisku skutkuje narysowaniem pary oddanych strzałów
+      async function fun() {  
+          await sleep(200);
+          let map1 = drawHit(finalMap1,ctx1); //Tu rysujemy pola, które zostały ustrzelone
+          await sleep(200);
+          let map2 = drawHit(finalMap2,ctx2);
+          count1=0;
+          count2=0;
+          for(i=1;i<11;i++){ //zliczamy ile razy trafiliśmy łącznie w statek "3" to trafienie
+            for(j=1;j<11;j++){ 
+                  if(map1[i][j]==3)
+                  count1++;
+                  if(map2[i][j]==3)
+                  count2++;
+              }
+          }
+          if(count1==16){ //4+3+3+2+2 łączna suma wszystkich pól statków dla jednego gracza(Jeśli poprawię mechanizm losujący:))
+            document.getElementById("hello").innerHTML = "Player one wins.";
+          }
+           else if(count2==16){
+          document.getElementById("hello").innerHTML = "Player two wins.";
+          } 
+    }  
+     </script>
+     <style>
+       #hello
+       {
+         text-align: center;
+         color: ghostwhite;
+       }
+       body {
+            background-image: url("https://th.bing.com/th/id/R.5d8ff5821604e61e15f56814f0cd9130?rik=91XAl96gxsRdOA&pid=ImgRaw");
+            background-color: #cccccc;
+            }
+     </style>
+  </body>
+
+</html>

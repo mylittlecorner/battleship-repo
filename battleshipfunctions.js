@@ -1,3 +1,4 @@
+
 function drawBoxes(myLittleMap,ctx)
 {
     let img = new Image();   // Tu tworzymy obraz pudełka

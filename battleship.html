@@ -30,6 +30,14 @@
     let rows = setBoxAmount(12);
     let columns = setBoxAmount(12);
 
+    const board1 = new Board(rows, columns, "gridplayer",boxDim);
+    board1.initializeBoard();
+    let ctx1 = board1.returnCtx();
+
+    const board2 = new Board(rows, columns, "gridenemy",boxDim);
+    board2.initializeBoard();
+    let ctx2 = board2.returnCtx();
+
     const shipsV=[4,3,2]; //Trzy statki w pozycji pionowej, numer oznacza długość statku
     const shipsH=[3,2,2]; //Analogicznie
 
@@ -38,9 +46,6 @@
 
     let mapV2= randomShipPositionV(shipsV,shipMap()); //Analogicznie dla 2 gracza
     let finalMap2= randomShipPositionH(shipsH,mapV2);
-
-    let ctx1 = drawGrid(rows, columns,"gridplayer"); //metoda zwracająca kontekst canvas
-    let ctx2 = drawGrid(rows, columns,"gridenemy"); //:)
 
     drawBoxes(finalMap1,ctx1); //przekazujemy mapy oraz konteksty
     drawBoxes(finalMap2,ctx2);

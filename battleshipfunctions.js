@@ -1,19 +1,18 @@
+const FREE = 0;
+const OCCUPIED = 1;
+const FIELD = 2;
+const HIT = 3;
+const MISS = 4;
 
-function drawBoxes(myLittleMap,ctx)
-{
+function drawBoxes(myLittleMap,ctx){
     let img = new Image();   // Tu tworzymy obraz pudełka
     img.src ='https://static.thenounproject.com/png/2831785-200.png';
-    img.onload = function()
-    {
-    let i=0;
+    img.onload = function(){
     let k;
     let l;
-                for(k=1;k<11;k++)//Po załadowaniu każde pole ze statkiem otrzyma ten obraz
-                {
-                    for(l=1;l<11;l++)
-                    {
-                            if(myLittleMap[k][l]==1)
-                            {
+                for(k=1;k<11;k++){ //Po załadowaniu każde pole ze statkiem otrzyma ten obraz
+                    for(l=1;l<11;l++){
+                            if(myLittleMap[k][l]===OCCUPIED){
                                     ctx.drawImage(img,k*boxDim+1, l*boxDim+1, boxDim-1, boxDim-1);
 
                             }
@@ -59,12 +58,10 @@ function shipMap(){ //nasza mapa. 1 to granica mapy lub statek, 0 to wolne pole 
 }
 
 
-    function drawHit(myLittleMap,ctx)
-    {   
+    function drawHit(myLittleMap,ctx){   
         let x = randomNumber(1,10);
         let y = randomNumber(1,10);
-        while(myLittleMap[x][y]==3 || myLittleMap[x][y]==4)//sprawdzamy czy mapa nie posiada wartości 3 lub 4 aby losowanie było sprawiedliwe
-        {
+        while(myLittleMap[x][y]===HIT || myLittleMap[x][y]===MISS){//sprawdzamy czy mapa nie posiada wartości 3 lub 4 aby losowanie było sprawiedliwe
             x = randomNumber(1,10);
             y = randomNumber(1,10);
         }
@@ -72,18 +69,15 @@ function shipMap(){ //nasza mapa. 1 to granica mapy lub statek, 0 to wolne pole 
         imgMiss.src ='https://cdn.pngsumo.com/cross-png-icon-216607-free-icons-library-black-cross-png-982_982.jpg';
         let imgHit = new Image();   // Obrazek trafienie
         imgHit.src ='https://p7.hiclipart.com/preview/621/587/778/no-symbol-computer-icons-clip-art-image-red-cross.jpg';
-        if(myLittleMap[x][y]==1)//Jeśli trafiliśmy statek to oznaczamy 3, jeśli pudło to 4
-        {
-            myLittleMap[x][y]=3;
-                imgHit.onload = function()
-                {
+        if(myLittleMap[x][y]===OCCUPIED){ //Jeśli trafiliśmy statek to oznaczamy 3, jeśli pudło to 4
+            myLittleMap[x][y]=HIT;
+                imgHit.onload = function(){
                                 ctx.drawImage(imgHit,x*boxDim+1, y*boxDim+1, boxDim-1, boxDim-1);//trafienie
                 };
         }
         else{
-            myLittleMap[x][y]=4;
-            imgMiss.onload = function()
-            {
+            myLittleMap[x][y]=MISS;
+            imgMiss.onload = function(){
                             ctx.drawImage(imgMiss,x*boxDim+1, y*boxDim+1, boxDim-1, boxDim-1);//pudło
             };
         }   
@@ -92,103 +86,66 @@ function shipMap(){ //nasza mapa. 1 to granica mapy lub statek, 0 to wolne pole 
         return myLittleMap; //zwracamy mapę
     }
 
-function randomShipPositionH(ships,myshipmap){
-    let index = 0;
-    let myshipmapcopy = myshipmap;
-    let x;
-    let y;
-    let i;
-    let isOk;
-    while (index < ships.length)
-    {
-            while(true)//ship horizontal alignment
-            {
-                x = randomNumber(1,10-ships[index]-1); //losujemy tak długo, aż znajdziemy wolne miejsce, gdzie nie ma 2.
-                y = randomNumber(1,10);
-                isOk=false;
-                for(i=0;i<ships[index];i++){
-                    if(myshipmapcopy[x+i][y]==0)//Czy jest miejsce tutaj na statek?
-                    {
-                          if(i==0)
-                          {
-                            myshipmapcopy[x-1][y+1]=2;   //   2 |2 2 2 |2
-                            myshipmapcopy[x-1][y]=2;     //   2 |1 1 1 |2    Otaczamy nasz statek polem, które uniemożliwia w polu 2 umieszczenie statku. Czasami czasami źle rysuje statek
-                            myshipmapcopy[x-1][y-1]=2;   //   2 |2 2 2 |2
-                          }
-                            myshipmapcopy[x+i][y+1]=2;
-                            myshipmapcopy[x+i][y]=1;
-                            myshipmapcopy[x+i][y-1]=2;
-                          if(i==ships[index]-1)
-                          {
-                            myshipmapcopy[x+i+1][y+1]=2;
-                            myshipmapcopy[x+i+1][y]=2;
-                            myshipmapcopy[x+i+1][y-1]=2;
-                            isOk=true;//Wszystkie pola były dobre, więc zapisujemy
-                            myshipmap=myshipmapcopy;// udało się utworzyć statek? Zapisujemy
-                          }
-                    }
-                    else{
-                        myshipmapcopy=myshipmap;//Nie udało się utworzyć statku, zajęte pole, szukamy pola dalej i wracamy do prawidłowej mapy
-                        break;
-                    }
-                    
+
+
+function randomShipPositionH(ships,shipmap)
+{
+    var myshipmap = JSON.parse(JSON.stringify(shipmap));
+    let index,i,x,y;
+    var myshipmapcopy = JSON.parse(JSON.stringify(myshipmap));
+    for(index=0;index<ships.length;index++){
+        x = randomNumber(1,10-ships[index]-1);
+        y = randomNumber(1,10);
+
+        for(i=0;i<ships[index];i++){
+            if(myshipmapcopy[x+i][y]===FREE){
+                if(i===0){
+                    myshipmapcopy[x-1][y-1] = FIELD, myshipmapcopy[x-1][y] = FIELD, myshipmapcopy[x-1][y+1] = FIELD; 
                 }
-                if(isOk) //Jest okej? Następny statek
+                    myshipmapcopy[x+i][y-1] = FIELD, myshipmapcopy[x+i][y] = OCCUPIED, myshipmapcopy[x+i][y+1] = FIELD;
+                
+                if(i===ships[index]-1){
+                    myshipmapcopy[x+i+1][y-1] = FIELD, myshipmapcopy[x+i+1][y] = FIELD, myshipmapcopy[x+i+1][y+1] = FIELD;
+                    var myshipmap=JSON.parse(JSON.stringify(myshipmapcopy));
+                }
+            }
+            else{
+                var myshipmapcopy=JSON.parse(JSON.stringify(myshipmap));
+                index--;
                 break;
             }
-        index++;
+        }
+        
     }
     return myshipmap;
 }
 
-function randomShipPositionV(ships,myshipmap)
-{
-    let index = 0;
-    let myshipmapcopy = myshipmap; 
-    let x;
-    let y;
-    let i;
-    let isOk;
-    while (index < ships.length)
-    {
-            while(true)//ship vertical alignment
-            {
-                myshipmapcopy=myshipmap;
-                x = randomNumber(1,10);
-                y = randomNumber(1,10-ships[index]-1);
-                isOk=false;
-                for(i=0;i<ships[index];i++)
-                {
-                    if(myshipmapcopy[x][y+i]==0)
-                    {
-                          if(i==0)
-                          {
-                            myshipmapcopy[x+1][y-1]=2;
-                            myshipmapcopy[x][y-1]=2;
-                            myshipmapcopy[x-1][y-1]=2;
-                          }
-                            myshipmapcopy[x+1][y+i]=2;
-                            myshipmapcopy[x][y+i]=1;
-                            myshipmapcopy[x-1][y+i]=2;
-                          if(i==ships[index]-1)
-                          {
-                            myshipmapcopy[x+1][y+i+1]=2;
-                            myshipmapcopy[x][y+i+1]=2;
-                            myshipmapcopy[x-1][y+i+1]=2;
-                            isOk=true;
-                            myshipmap=myshipmapcopy;
-                          }
-                    }
-                    else{
-                        myshipmapcopy=myshipmap;
-                        break;
-                    }
+function randomShipPositionV(ships,shipmap){
+    let index,i,x,y;
+    var myshipmap = JSON.parse(JSON.stringify(shipmap));
+    var myshipmapcopy = JSON.parse(JSON.stringify(myshipmap));
+    for(index=0;index<ships.length;index++){
+        x = randomNumber(1,10);
+        y = randomNumber(1,10-ships[index]-1);
+        for(i=0;i<ships[index];i++){
+            if(myshipmapcopy[x][y+i]===FREE){
+                if(i===0){
+                    myshipmapcopy[x-1][y-1] = FIELD, myshipmapcopy[x][y-1] = FIELD, myshipmapcopy[x+1][y-1] = FIELD; 
                 }
-                if(isOk)
+                    myshipmapcopy[x-1][y+i] = FIELD, myshipmapcopy[x][y+i] = OCCUPIED, myshipmapcopy[x+1][y+i] = FIELD;
+
+                if(i===ships[index]-1){
+                    myshipmapcopy[x-1][y+i+1] = FIELD, myshipmapcopy[x][y+i+1] = FIELD, myshipmapcopy[x+1][y+i+1] = FIELD;
+                    var myshipmap = JSON.parse(JSON.stringify(myshipmapcopy));
+                }
+            }
+            else{
+                var myshipmapcopy=JSON.parse(JSON.stringify(myshipmap));
+                index--;
                 break;
             }
-        index++;
+        }
+        
     }
-  return myshipmap;
+    return myshipmap;
 }
-
